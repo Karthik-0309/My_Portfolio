@@ -1,15 +1,9 @@
 /** @type {import('next').NextConfig} */
 
-const isGitHubPages = process.env.GITHUB_ACTIONS === "true"; // Check if running in GitHub Actions
+// Check if running in GitHub Actions
+const isGitHubPages = process.env.GITHUB_ACTIONS === "true";
 
-const withPWA = require("next-pwa")({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  // Disable PWA for development and GitHub Pages
-  disable: process.env.NODE_ENV === "development" || isGitHubPages,
-});
-
+// Define the base Next.js configuration
 const nextConfig = {
   reactStrictMode: true,
   // Set basePath and assetPrefix for GitHub Pages
@@ -19,4 +13,16 @@ const nextConfig = {
   output: "export",
 };
 
-module.exports = withPWA(nextConfig);
+// Conditionally include PWA support
+if (!isGitHubPages) {
+  const withPWA = require("next-pwa")({
+    dest: "public",
+    register: true,
+    skipWaiting: true,
+    // Disable PWA in development
+    disable: process.env.NODE_ENV === "development",
+  });
+  module.exports = withPWA(nextConfig);
+} else {
+  module.exports = nextConfig;
+}
