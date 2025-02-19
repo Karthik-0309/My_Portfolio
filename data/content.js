@@ -106,7 +106,7 @@ If I'm not working, you'll probably find me experimenting with new tools, conjur
   textB:
     "Here are a few technologies I‘ve been working with recently (and in the past):",
   img: {
-    uri: "/logo.jpg",
+    uri: "/Logo4.jpg",
     alt: "Karthik Kashyap",
   },
   colorSwitch: {
@@ -358,7 +358,7 @@ export const EXPERIENCE_DATA = {
 
 export const CONTACT = {
   title: "Get In Touch",
-  message: `Excited to explore new challenges and bring my skills to the table, I'm equally intrigued by the tech enthusiasts and innovators who visit this space. What brought our digital paths together? Whether you have an exciting opportunity, a pressing question, or just want to chat, drop a message in the form below. Every message piques my curiosity, and I'll respond with enthusiasm!`,
+  message: `Excited to take on new challenges and collaborate with like-minded tech enthusiasts, I’m always eager to connect with innovators who share a passion for technology. Whether you have an exciting opportunity, an intriguing question, or simply want to exchange ideas, feel free to reach out via LinkedIn, GitHub, or Instagram. Let’s connect and create something impactful!`,
   btnText: "Send",
   btnLoadingText: "Sending...",
   toast: {

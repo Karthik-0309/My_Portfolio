@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -7,39 +7,40 @@ import {
   Textarea,
   useColorMode,
   useToast,
-} from '@chakra-ui/react'
-import StackWithTitleWrapper from './StackWithTitleWrapper'
+} from "@chakra-ui/react";
+import StackWithTitleWrapper from "./StackWithTitleWrapper";
 import { primaryBackgroundColor } from "../styles/theme";
 
-import emailjs from 'emailjs-com'
-import { init } from '@emailjs/browser'
-import HCaptcha from '@hcaptcha/react-hcaptcha'
-import { CONTACT } from '../data/content'
+import emailjs from "emailjs-com";
+import { init } from "@emailjs/browser";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
+import { CONTACT } from "../data/content";
 
-const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID
-const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLTE_ID
-const userId = process.env.NEXT_PUBLIC_EMAILJS_USER_ID
+const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
+const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLTE_ID;
+const userId = process.env.NEXT_PUBLIC_EMAILJS_USER_ID;
 
-init(userId)
+init(userId);
 
 const Contact = ({ id, sectionIndex, sectionTitle }) => {
-  const { colorMode } = useColorMode()
+  const { colorMode } = useColorMode();
 
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [subject, setSubject] = useState('')
-  const [message, setMessage] = useState('')
-  const [isLoading, setLoading] = useState(false)
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [isLoading, setLoading] = useState(false);
 
-  const [token, setToken] = useState(null)
-  const captchaRef = useRef(null)
+  const [token, setToken] = useState(null);
+  const captchaRef = useRef(null);
 
-  const toast = useToast()
+  const toast = useToast();
 
-  const isValidEmail = email => {
-    const regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    return regex.test(String(email).toLowerCase())
-  }
+  const isValidEmail = (email) => {
+    const regex =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return regex.test(String(email).toLowerCase());
+  };
 
   // Reference: https://docs.hcaptcha.com/configuration#jsapi
   const handleSubmit = () => {
@@ -47,145 +48,141 @@ const Contact = ({ id, sectionIndex, sectionTitle }) => {
       if (!isValidEmail(email)) {
         toast({
           title: CONTACT.toast.invalidEmail,
-          status: 'warning',
+          status: "warning",
           isClosable: true,
-          position: 'bottom-left'
-        })
-        return
+          position: "bottom-left",
+        });
+        return;
       }
-      captchaRef.current.execute()
+      captchaRef.current.execute();
     } else {
       toast({
         title: CONTACT.toast.fieldsRequired,
-        status: 'warning',
+        status: "warning",
         isClosable: true,
-        position: 'bottom-left'
-      })
-      setLoading(false)
+        position: "bottom-left",
+      });
+      setLoading(false);
     }
-  }
+  };
 
   const onExpire = () => {
-    window.splitbee.track('hCaptcha', {
-      type: 'hCaptcha Token Expired'
-    })
-  }
+    window.splitbee.track("hCaptcha", {
+      type: "hCaptcha Token Expired",
+    });
+  };
 
   const onClose = () => {
-    window.splitbee.track('hCaptcha', {
-      type: 'hCaptcha Closedd'
-    })
-  }
+    window.splitbee.track("hCaptcha", {
+      type: "hCaptcha Closedd",
+    });
+  };
 
   const onChalExpire = () => {
-    window.splitbee.track('hCaptcha', {
-      type: 'hCaptcha Chal Token Expired'
-    })
-  }
+    window.splitbee.track("hCaptcha", {
+      type: "hCaptcha Chal Token Expired",
+    });
+  };
 
-  const onError = err => {
-    window.splitbee.track('hCaptcha', {
-      type: `hCaptcha Error: ${err}`
-    })
-  }
+  const onError = (err) => {
+    window.splitbee.track("hCaptcha", {
+      type: `hCaptcha Error: ${err}`,
+    });
+  };
 
   useEffect(() => {
     if (token) {
-      ; (async () => {
+      (async () => {
         // verify response token server side
         const response =
-          (await fetch('/api/hCaptcha', {
-            method: 'POST',
+          (await fetch("/api/hCaptcha", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json'
+              "Content-Type": "application/json",
             },
-            body: JSON.stringify({ token })
-          })) || {}
+            body: JSON.stringify({ token }),
+          })) || {};
 
-        const {
-          success: isTokenVerified,
-          message: errMsg = null
-        } = await response.json()
+        const { success: isTokenVerified, message: errMsg = null } =
+          await response.json();
 
         if (isTokenVerified) {
           const templateParams = {
             name,
             email,
             message,
-            subject
-          }
+            subject,
+          };
 
-          setLoading(true)
+          setLoading(true);
 
           emailjs
             .send(serviceId, templateId, templateParams, userId)
-            .then(response => {
+            .then((response) => {
               if (response && response.status === 200) {
                 toast({
                   title: CONTACT.toast.success,
-                  status: 'success',
+                  status: "success",
                   isClosable: true,
-                  position: 'bottom-left'
-                })
+                  position: "bottom-left",
+                });
               } else {
                 toast({
                   title: CONTACT.toast.error,
-                  status: 'error',
+                  status: "error",
                   isClosable: true,
-                  position: 'bottom-left'
-                })
+                  position: "bottom-left",
+                });
               }
-              setLoading(false)
+              setLoading(false);
             })
-            .catch(e => {
+            .catch((e) => {
               toast({
                 title: CONTACT.toast.generalError,
-                status: 'error',
+                status: "error",
                 isClosable: true,
-                position: 'bottom-left'
-              })
-              setLoading(false)
-            })
+                position: "bottom-left",
+              });
+              setLoading(false);
+            });
 
-          setName('')
-          setEmail('')
-          setSubject('')
-          setMessage('')
+          setName("");
+          setEmail("");
+          setSubject("");
+          setMessage("");
           if (isLoading) {
-            setLoading(false)
+            setLoading(false);
           }
         } else {
           toast({
             title: CONTACT.toast.captchaError,
-            status: 'error',
+            status: "error",
             isClosable: true,
-            position: 'bottom-left'
-          })
-          window.splitbee.track('hCaptcha', {
-            type: errMsg || CONTACT.toast.captchaError
-          })
+            position: "bottom-left",
+          });
+          window.splitbee.track("hCaptcha", {
+            type: errMsg || CONTACT.toast.captchaError,
+          });
         }
-        setToken(null)
-      })()
+        setToken(null);
+      })();
     } else {
-      return () => setToken(null)
+      return () => setToken(null);
     }
-  }, [email, isLoading, message, name, subject, toast, token, setToken])
+  }, [email, isLoading, message, name, subject, toast, token, setToken]);
 
   return (
-  <Box
-  className="pattern"
-  >
+    <Box className="pattern">
       <StackWithTitleWrapper
-      id={id}
-      sectionIndex={sectionIndex}
-      sectionTitle={sectionTitle}
-      bg={`radial-gradient(circle, ${primaryBackgroundColor}99 100%, transparent 100%)`}
-    >
-      <Text color={CONTACT.colorSwitch.text[colorMode]} fontSize='xl' mb={8}>
-        {CONTACT.message}
-      </Text>
-      <Input
+        id={id}
+        sectionIndex={sectionIndex}
+        sectionTitle={sectionTitle}
+        bg={`radial-gradient(circle, ${primaryBackgroundColor}99 100%, transparent 100%)`}
+      >
+        <Text color={CONTACT.colorSwitch.text[colorMode]} fontSize="xl" mb={8}>
+          {CONTACT.message}
+        </Text>
+        {/* <Input
         _placeholder={CONTACT.colorSwitch.placeholderColor}
         value={name}
         borderColor={CONTACT.colorSwitch.fieldBorderColor[colorMode]}
@@ -194,8 +191,8 @@ const Contact = ({ id, sectionIndex, sectionTitle }) => {
         type='text'
         placeholder='Your name'
         onChange={e => setName(e.target.value)}
-      />
-      <Input
+      /> */}
+        {/* <Input
         _placeholder={CONTACT.colorSwitch.placeholderColor}
         value={email}
         borderColor={CONTACT.colorSwitch.fieldBorderColor[colorMode]}
@@ -244,10 +241,10 @@ const Contact = ({ id, sectionIndex, sectionTitle }) => {
         onClick={handleSubmit}
       >
         {CONTACT.btnText}
-      </Button>
-    </StackWithTitleWrapper>
-  </Box>
-  )
-}
+      </Button> */}
+      </StackWithTitleWrapper>
+    </Box>
+  );
+};
 
-export default Contact
+export default Contact;
